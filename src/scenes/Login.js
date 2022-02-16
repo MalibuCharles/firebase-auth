@@ -1,15 +1,23 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 import {getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup} from 'firebase/auth'
 import { app } from '../ConnectAuth'
 
 
-export default function Login({setUser}) {
+export default function Login({setUser, user}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
     const provider = new GoogleAuthProvider()
     const auth = getAuth(app);
+
+    useEffect(() => {
+     const localUser = localStorage.getItem('displayName')
+
+     console.log('localUser from LS',localUser)
+
+     if(localUser) navigate('/')
+    }, [])
    
     const handleFormSubmit = (event) => {
         event.preventDefault();
@@ -25,10 +33,16 @@ export default function Login({setUser}) {
             signInWithPopup(auth, provider)
             .then(result => {
                 setUser(result.user)
+                localStorage.setItem('displayName', result.user.displayName)
+                localStorage.setItem('avatar', result.user.photoURL)
+                localStorage.setItem('uid', result.user.uid)
+                console.log('this is my result', result.user.displayName)
                 navigate('/')
             })
             .catch(alert)
     }
+
+    console.log('here is my useEffect and user', user)
 
     return(
         <>
